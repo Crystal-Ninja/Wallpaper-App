@@ -1,40 +1,29 @@
 import React from "react";
 import "./slides.css";
 
-export const Slide = React.memo(function (StackedCarouselSlideProps) {
-  const {
-    data,
-    dataIndex,
-    isCenterSlide,
-    swipeTo,
-    slideIndex
-  } = StackedCarouselSlideProps;
+export const Slide = React.memo(function ({ data, dataIndex, isCenterSlide, swipeTo, slideIndex }) {
+  const { image, text } = data[dataIndex];
 
-  const coverImage = data[dataIndex].image;
-  const text = data[dataIndex].text;
-
-  console.log(coverImage);
   return (
-    <div className="card-card" draggable={false}>
-      <div className={`cover fill ${isCenterSlide ? "off" : "on"}`}>
-        <div
-          className="card-overlay fill"
-          onClick={() => {
-            if (!isCenterSlide) swipeTo(slideIndex);
-          }}
+    <div className="card-card w-full h-full flex flex-col items-center" draggable={false}>
+      <div
+        className={`cover relative w-full h-[70%] ${isCenterSlide ? "off" : "on"}`}
+        onClick={() => {
+          if (!isCenterSlide) swipeTo(slideIndex);
+        }}
+      >
+        <img
+          src={image}
+          alt={text}
+          className="w-full h-full object-cover rounded-lg shadow-lg"
         />
       </div>
-      <div className="detail fill">
-        <div className="discription">
-          <img
-            style={{ width: 10 }}
-            alt="j"
-            className="cover-image"
-            src={coverImage}
-          />
-          <p>{text}</p>
-        </div>
+
+      {/* Description just below the image */}
+      <div className="detail mt-2 text-center">
+        <p className="text-white">{text}</p>
       </div>
     </div>
   );
 });
+

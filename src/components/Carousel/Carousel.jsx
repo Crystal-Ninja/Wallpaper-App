@@ -29,10 +29,10 @@ const data = [
 ];
 
 const CardExample = () => {
-  const ref = React.useRef(StackedCarousel);
+  const ref = React.useRef();
   return (
-    <div className="card">
-      <div style={{ width: "100%", position: "relative" }}>
+    <div className="card ">
+      <div className="w-full h-screen flex items-center justify-center">
         <ResponsiveContainer
           carouselRef={ref}
           render={(width, carouselRef) => {
@@ -40,8 +40,9 @@ const CardExample = () => {
               <StackedCarousel
                 ref={carouselRef}
                 slideComponent={Slide}
-                slideWidth={200}
-                carouselWidth={width}
+                slides={data.length}
+                slideWidth={400} 
+                carouselWidth={window.innerWidth}
                 data={data}
                 maxVisibleSlide={5}
                 disableSwipe
@@ -57,3 +58,5 @@ const CardExample = () => {
 };
 
 export default CardExample;
+
+

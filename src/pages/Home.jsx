@@ -1,9 +1,11 @@
-import React from 'react'
-
+import React from "react";
+import CardExample from "../components/Carousel/Carousel";
 const Home = () => {
   return (
-    <div>Home</div>
-  )
-}
+    <div>
+      <CardExample />
+    </div>
+  );
+};
 
-export default Home
+export default Home;
