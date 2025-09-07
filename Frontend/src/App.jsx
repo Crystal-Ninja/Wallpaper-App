@@ -1,8 +1,8 @@
 import React from "react";
-import Home from "./pages/Home";
-import Profile from "./pages/profile";
-import Favourite from "./pages/favourite";
-import Wallpaper from "./pages/Wallpaper";
+import Home from "./pages/Home.jsx";
+import Profile from "./pages/profile.jsx";
+import Favourite from "./pages/favourite.jsx";
+import Wallpaper from "./pages/Wallpaper.jsx";
 import Footer from "./components/Footer.jsx";
 import Settings from "./pages/Settings.jsx";
 

@@ -1,6 +1,6 @@
 import React from "react";
 // import Carousel from "../components/Carousel.jsx";
-import MasonryGrid from "../components/mansoryGrid.jsx";
+import MasonryGrid from "../components/masonry.jsx";
 const Home = () => {
   return (
     <div>
