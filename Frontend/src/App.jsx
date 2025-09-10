@@ -5,6 +5,7 @@ import Favourite from "./pages/favourite.jsx";
 import Wallpaper from "./pages/Wallpaper.jsx";
 import Footer from "./components/Footer.jsx";
 import Settings from "./pages/Settings.jsx";
+import Spp from "../app.jsx";
 
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
@@ -16,7 +17,6 @@ export default function App() {
       <div className="flex">
         {/* Sidebar */}
         <SidebarMenu />
-
         {/* Main content */}
         <div className="flex-1">
           <Routes>

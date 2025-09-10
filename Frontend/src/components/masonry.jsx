@@ -1,28 +1,33 @@
-import { div } from "framer-motion/client";
+import { useEffect, useState } from "react";
 import Masonry from "react-masonry-css";
-import { useState } from "react";
 
 export default function MasonryGrid() {
-  const [search, setSearch] = useState("");
-  const images = [
-    "/-3LMiFRI.jpeg",
-    "/1sxS9LUf.jpeg",
-    "/5JAfXYOd.jpeg",
-    "/DdacpnyW.jpeg",
-    "/nOvx8f3y.jpeg",
-    "/oq383M6c.jpeg",
-    "/-eH8XWNO.jpeg",
-    "5Ii0lqzy.jpeg",
-    "/7Qu4P8R4.jpeg",
-    "/dFjmvksA.jpeg",
-    "/MV33W7oy.jpeg",
-    "/OKMwhXAt.jpeg",
-    "/pNPAVC6n.jpeg",
-    "/Y9lQKbRN.jpeg",
-  ];
-  const filteredImages = images.filter((src) =>
-    src.toLowerCase().includes(search.toLowerCase())
-  );
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [query, setQuery] = useState("art"); // default search
+  const [searchText, setSearchText] = useState("art");
+
+  // Fetch images from backend API
+  async function fetchImages(q) {
+    try {
+      setLoading(true);
+      const res = await fetch(
+        `http://localhost:5000/external?query=${encodeURIComponent(q)}`
+      );
+      const data = await res.json();
+      setImages(data.items);
+    } catch (err) {
+      console.error("Error fetching images:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // Fetch images when component mounts OR query changes
+  useEffect(() => {
+    fetchImages(query);
+  }, [query]);
+
   const breakpointColumnsObj = {
     default: 4,
     1100: 3,
@@ -31,33 +36,51 @@ export default function MasonryGrid() {
   };
 
   return (
-    <div>
-      <div className="w-full mb-6 px-4 mt-6">
+    <div className="p-4">
+      {/* 🔎 Search Bar */}
+      <div className="flex justify-center mb-6">
         <input
           type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
           placeholder="Search images..."
-          className="w-full px-4 py-2 rounded-sm bg-gray-800 text-white placeholder-gray-400 
-                    border border-gray-600 focus:outline-none focus:ring-2 
-                    focus:border-white shadow-sm"
+          className="w-full max-w-xl px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
+        <button
+          onClick={() => setQuery(searchText)}
+          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+        >
+          Search
+        </button>
       </div>
-      <Masonry
-        breakpointCols={breakpointColumnsObj}
-        className="flex gap-8"
-        columnClassName="bg-clip-padding"
-      >
-      {images.map((src, i) => (
-        <img
-          key={i}
-          src={src}
-          alt="masonry"
-          className="mb-8 w-full rounded-xl shadow-md hover:scale-105 transition-transform duration-300"
-        />
-      ))}
-      </Masonry>
 
+      {/* Masonry Grid */}
+      {loading ? (
+        <p className="text-center text-gray-500">Loading...</p>
+      ) : images.length === 0 ? (
+        <p className="text-center text-gray-500">No images found</p>
+      ) : (
+        <Masonry
+          breakpointCols={breakpointColumnsObj}
+          className="flex gap-4"
+          columnClassName="bg-clip-padding"
+        >
+          {images.map((img) => (
+            <a
+              key={img.id}
+              href={img.link}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src={img.thumb}
+                alt={img.author}
+                className="mb-4 w-full rounded-xl shadow-md hover:scale-[1.02] transition"
+              />
+            </a>
+          ))}
+        </Masonry>
+      )}
     </div>
   );
 }

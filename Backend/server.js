@@ -1,30 +1,37 @@
 import dotenv from "dotenv";
-import Cors from "cors";
+import cors from "cors";
 import express from "express";
 import { ConnectDB } from "./src/db.js";
-import { connect } from "mongoose";
+import authRouter from "./src/middleware/auth.js";
+import imagesRouter from "./src/routes/images.js";
+import imageRoute from "./src/routes/external.js";
+
 dotenv.config();
-console.log("MONGO_URL from .env:", process.env.MONGO_URL);
 
 const app = express();
 
-app.use(Cors({
-    origin: process.env.CORS_OPTIONS || "*",
-    Credential:true
+app.use(cors({
+  origin: "http://localhost:5173", 
+  credentials: true
 }));
 
 app.use(express.json());
 
+app.use("/images", imagesRouter);
+app.use("/auth", authRouter);
+app.use("/external", imageRoute);
+
 app.get("/", (req, res) => {
   res.json({ ok: true, message: "API running" });
 });
+
 
 app.use((err, req, res, next) => {
   console.error("Unhandled error:", err);
   res.status(err.status || 500).json({ message: err.message || "Server error" });
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 ConnectDB(process.env.MONGO_URL)
   .then(() => {
     app.listen(PORT, () => {
@@ -33,5 +40,5 @@ ConnectDB(process.env.MONGO_URL)
   })
   .catch((err) => {
     console.error("Failed to start server due to DB error:", err);
-    process.exit(1); 
+    process.exit(1);
   });
