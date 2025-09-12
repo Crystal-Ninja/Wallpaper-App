@@ -5,12 +5,13 @@ import { User} from "../models/user.js"
 
 const router=Router();
 
+
 router.post("/register",async(req,res,next)=>{
     try {
         const {email,name,password}=req.body;
         const exists=await User.findOne({email});
         if(exists){
-            res.status(400).json({message:"email in use"});
+            return res.status(400).json({message:"email in use"});
         }
         const passwordHash=await bcrypt.hash(password,10);
         const user=await User.create({name,passwordHash,email});
@@ -18,17 +19,19 @@ router.post("/register",async(req,res,next)=>{
 
 
     } catch (e) {
-        {next(e);}
+        if (e.code === 11000) {
+            return res.status(400).json({ message: "Email already in use" });
+        }
+        next(e);
     }
 })
 
 router.post("/login",async (req,res,next) => {
     try {
             const {email,password}=req.body;
-
         const user = await User.findOne({ email }).select("+passwordHash");
         if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
         const valid = await bcrypt.compare(password, user.passwordHash);
@@ -42,7 +45,7 @@ router.post("/login",async (req,res,next) => {
 
 
     } catch (e) {
-        {next(e)}
+        next(e)
     }
 })
 router.post("/logout", (req, res) => {

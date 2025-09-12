@@ -23,7 +23,11 @@ const userSchema = new mongoose.Schema(
                     type:mongoose.Schema.Types.ObjectId,
                     ref:"image",
                 }
-        ]
+        ],
+        avatar: {
+             type: String,
+             default: ""
+        }, 
 
 
     },    {timestamps:true}

@@ -5,7 +5,7 @@ import { ConnectDB } from "./src/db.js";
 import authRouter from "./src/middleware/auth.js";
 import imagesRouter from "./src/routes/images.js";
 import imageRoute from "./src/routes/external.js";
-
+import profileRoute from "./src/routes/profile.js"
 dotenv.config();
 
 const app = express();
@@ -14,13 +14,13 @@ app.use(cors({
   origin: "http://localhost:5173", 
   credentials: true
 }));
-
+app.use(cors())
 app.use(express.json());
 
 app.use("/images", imagesRouter);
 app.use("/auth", authRouter);
 app.use("/external", imageRoute);
-
+app.use("/profile",profileRoute);
 app.get("/", (req, res) => {
   res.json({ ok: true, message: "API running" });
 });
