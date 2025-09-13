@@ -4,8 +4,8 @@ import Masonry from "react-masonry-css";
 export default function MasonryGrid() {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [query, setQuery] = useState("drawings"); // default search
-  const [searchText, setSearchText] = useState("drawings");
+  const [query, setQuery] = useState(""); // default search
+  const [searchText, setSearchText] = useState("");
 
   // Fetch images from backend API
   async function fetchImages(q) {

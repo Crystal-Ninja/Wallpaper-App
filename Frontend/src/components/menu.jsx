@@ -29,10 +29,10 @@ export default function SidebarMenu() {
   };
 
   return (
+    
     <div className="fixed left-0 top-0 h-screen w-17 bg-white border-r border-gray-200 flex flex-col items-center py-6 shadow-md z-50">
       {/* Logo */}
       <div className="text-blue-600 font-bold text-2xl mb-10">A</div>
-
       {/* Top Menu */}
       <nav className="flex flex-col items-center gap-5">
         {menuItems
@@ -46,10 +46,10 @@ export default function SidebarMenu() {
           </button>
           ))}
       </nav>
-
+      
       {/* Spacer pushes settings to bottom */}
       <div className="flex-1" />
-
+        
       {/* Bottom Menu (settings only) */}
       <nav className="flex flex-col items-center gap-5 mb-4">
         {menuItems

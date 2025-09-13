@@ -16,7 +16,9 @@ router.post("/register",async(req,res,next)=>{
         const passwordHash=await bcrypt.hash(password,10);
         const user=await User.create({name,passwordHash,email});
         res.status(201).json({ id: user._id, email: user.email ,name:user.name});
-
+        const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     } catch (e) {
         if (e.code === 11000) {

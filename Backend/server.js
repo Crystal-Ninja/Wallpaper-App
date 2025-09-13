@@ -9,7 +9,8 @@ import profileRoute from "./src/routes/profile.js"
 dotenv.config();
 
 const app = express();
-
+// app.use(express.static("public"))
+app.use('/static-images', express.static('Backend/public/images'));
 app.use(cors({
   origin: "http://localhost:5173", 
   credentials: true
@@ -21,6 +22,7 @@ app.use("/images", imagesRouter);
 app.use("/auth", authRouter);
 app.use("/external", imageRoute);
 app.use("/profile",profileRoute);
+
 app.get("/", (req, res) => {
   res.json({ ok: true, message: "API running" });
 });
