@@ -8,20 +8,20 @@ const router = Router();
 const UNSPLASH_KEY = process.env.UNSPLASH_ACCESS_KEY; 
 
 const defaultImages = [
-  { id: "local1", url: "/images/ironman.jpeg", thumb: "/images/ironman.jpg", author: "Local", link: "#2" },
-  { id: "local2", url: "/images/skull.jpeg", thumb: "/images/skull.jpg", author: "Local", link: "#1" },
-//   { id: "local3", url: "/images/ladybug.jpg", thumb: "/images/ladybug.jpg", author: "Local", link: "#" },
-//   { id: "local4", url: "/images/fish.jpg", thumb: "/images/fish.jpg", author: "Local", link: "#" },
-//   { id: "local5", url: "/images/blackcat.jpg", thumb: "/images/blackcat.jpg", author: "Local", link: "#" },
-//   { id: "local6", url: "/images/architect.jpg", thumb: "/images/architect.jpg", author: "Local", link: "#" },
-//   { id: "local7", url: "/images/redcat.jpg", thumb: "/images/redcat.jpg", author: "Local", link: "#" },
-//   { id: "local8", url: "/images/sheep.jpg", thumb: "/images/sheep.jpg", author: "Local", link: "#" },
-//   { id: "local9", url: "/images/japan.jpg", thumb: "/images/japan.jpg", author: "Local", link: "#" },
-//   { id: "local10", url: "/images/lamp.jpg", thumb: "/images/lamp.jpg", author: "Local", link: "#" },
-//   { id: "local11", url: "/images/wallpaper.jpg", thumb: "/images/wallpaper.jpg", author: "Local", link: "#" },
-//   { id: "local12", url: "/images/watercat.jpg", thumb: "/images/watercat.jpg", author: "Local", link: "#" },
-//   { id: "local13", url: "/images/yello.jpg", thumb: "/images/yello.jpg", author: "Local", link: "#" },
-//   { id: "local14", url: "/images/car.jpg", thumb: "/images/car.jpg", author: "Local", link: "#" },
+  { id: "local1", url: "ironman.jpeg", thumb: "ironman.jpeg", author: "Local", link: "#2" },
+  { id: "local2", url: "skull.jpeg", thumb: "skull.jpeg", author: "Local", link: "#1" },
+  { id: "local12", url: "watercat.jpeg", thumb: "watercat.jpeg", author: "Local", link: "#" },  
+  { id: "local3", url: "ladybug.jpeg", thumb: "ladybug.jpeg", author: "Local", link: "#4" },
+  { id: "local5", url: "blackcat.jpeg", thumb: "blackcat.jpeg", author: "Local", link: "#5" },
+  { id: "local6", url: "architect.jpeg", thumb: "architect.jpeg", author: "Local", link: "#" },
+  { id: "local7", url: "redcat.jpeg", thumb: "redcat.jpeg", author: "Local", link: "#" },
+  { id: "local9", url: "japan.jpeg", thumb: "japan.jpeg", author: "Local", link: "#" },
+  { id: "local4", url: "fish.jpeg", thumb: "fish.jpeg", author: "Local", link: "#3" },
+  { id: "local10", url: "lamp.jpeg", thumb: "lamp.jpeg", author: "Local", link: "#" },
+  { id: "local8", url: "sheep.jpeg", thumb: "sheep.jpeg", author: "Local", link: "#" },  
+  { id: "local11", url: "wallpaper.jpeg", thumb: "wallpaper.jpeg", author: "Local", link: "#" },
+  { id: "local13", url: "yello.jpeg", thumb: "yello.jpeg", author: "Local", link: "#" },
+  { id: "local14", url: "car.jpeg", thumb: "car.jpeg", author: "Local", link: "#" },
 ];
 router.get("/", async (req, res, next) => {
   try {
@@ -51,11 +51,10 @@ router.get("/", async (req, res, next) => {
       url: x.urls.regular,
       thumb: x.urls.regular,
       author: x.user.name,
-      link: x.links.html
+      link: x.links.html,
+      type:"external",
     }));
-
-    const items = [...localImages, ...unsplashItems];
-    res.json({ items });
+    res.json({ items:unsplashItems });
   } catch (e) {
     next(e);
   }

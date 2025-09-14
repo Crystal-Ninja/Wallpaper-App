@@ -9,10 +9,10 @@ import profileRoute from "./src/routes/profile.js"
 dotenv.config();
 
 const app = express();
-// app.use(express.static("public"))
-app.use('/static-images', express.static('Backend/public/images'));
+//  app.use(express.static("public"))
+app.use('/static-images', express.static('./public/images'));
 app.use(cors({
-  origin: "http://localhost:5173", 
+  origin: "http://localhost:5174", 
   credentials: true
 }));
 app.use(cors())

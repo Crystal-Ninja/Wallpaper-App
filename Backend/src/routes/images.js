@@ -4,7 +4,7 @@ import { v2 as cloudinary } from "cloudinary";
 import { Image } from "../models/image.js"
 import { User } from "../models/user.js";
 import { requireAuth } from "../middleware/requireAuth.js";
-
+import mongoose from "mongoose";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -14,7 +14,7 @@ cloudinary.config({
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  limits: { fileSize: 5 * 1024 * 1024 }, 
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith("image/")) {
       cb(null, true);
@@ -24,9 +24,7 @@ const upload = multer({
   }
 });
 
-
 const router = Router();
-
 
 function uploadToCloudinary(fileBuffer, options = {}) {
   return new Promise((resolve, reject) => {
@@ -38,7 +36,6 @@ function uploadToCloudinary(fileBuffer, options = {}) {
   });
 }
 
-
 router.get("/", async (req, res, next) => {
   try {
     const { page = 1, limit = 20, search = "" } = req.query;
@@ -46,8 +43,8 @@ router.get("/", async (req, res, next) => {
     const q = search
       ? {
           $or: [
-            { title: new RegExp(search, "i") },
-            { tags: { $in: [new RegExp(search, "i")] } }
+            { Title: new RegExp(search, "i") },
+            { tags: new RegExp(search, "i") }
           ]
         }
       : {};
@@ -65,18 +62,13 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-
-
-// ==========================
 // POST /images → upload file
-// ==========================
 router.post("/", requireAuth, upload.single("file"), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file" });
 
     const { title = "", tags = "" } = req.body;
 
-    // Upload to Cloudinary
     const result = await uploadToCloudinary(req.file.buffer, {
       folder: "wallpaper_app"
     });
@@ -84,8 +76,8 @@ router.post("/", requireAuth, upload.single("file"), async (req, res, next) => {
     const img = await Image.create({
       owner: req.user.id,
       url: result.secure_url,
-      publicId: result.public_id,
-      title,
+      publicID: result.public_id,
+      Title: title,
       tags: tags ? tags.split(",").map((s) => s.trim()) : []
     });
 
@@ -95,9 +87,195 @@ router.post("/", requireAuth, upload.single("file"), async (req, res, next) => {
   }
 });
 
-// ===================================
-// DELETE /images/:id → delete (owner)
-// ===================================
+// GET /images/favorites → get user's favorite images (internal only)
+router.get("/favorites", requireAuth, async (req, res, next) => {
+  try {
+    console.log("Getting favorites for user ID:", req.user.id);
+    
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(req.user.id).populate('favorites');
+    
+    if (!user) {
+      console.log("User not found with ID:", req.user.id);
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    res.json({ items: user.favorites || [] });
+  } catch (e) {
+    console.error("Error in favorites route:", e);
+    next(e);
+  }
+});
+
+// GET /images/external/:externalId/is-favorite → check if external image is favorited
+router.get("/external/:externalId/is-favorite", requireAuth, async (req, res, next) => {
+  try {
+    console.log("Checking favorite status for:", req.params.externalId);
+    console.log("User ID:", req.user.id);
+    
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    
+    const user = await User.findById(req.user.id);
+    
+    if (!user) {
+      console.log("User not found with ID:", req.user.id);
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Handle case where externalFavorites might not exist yet
+    const externalFavorites = user.externalFavorites || [];
+    const isFavorite = externalFavorites.some(fav => 
+      fav.externalId === req.params.externalId
+    );
+    
+    console.log("External favorites count:", externalFavorites.length);
+    console.log("Is favorite:", isFavorite);
+    res.json({ isFavorite });
+  } catch (e) {
+    console.error("Error in is-favorite route:", e);
+    next(e);
+  }
+});
+
+// POST /images/external-favorite → add external image to favorites
+router.post("/external-favorite", requireAuth, async (req, res, next) => {
+  try {
+    console.log("Adding external favorite:", req.body);
+    console.log("User ID:", req.user.id);
+    
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    
+    const { externalId, url, thumb, author, title = "" } = req.body;
+    
+    if (!externalId || !url) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // Check if user exists
+    const existingUser = await User.findById(req.user.id);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const favoriteData = {
+      externalId,
+      url,
+      thumb,
+      author,
+      title: title || `Image by ${author}`,
+      source: 'unsplash',
+      dateAdded: new Date()
+    };
+
+    console.log("Favorite data:", favoriteData);
+
+    // Initialize externalFavorites array if it doesn't exist
+    const updateQuery = existingUser.externalFavorites 
+      ? { $addToSet: { externalFavorites: favoriteData } }
+      : { $set: { externalFavorites: [favoriteData] } };
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      updateQuery,
+      { new: true }
+    );
+
+    console.log("Updated user external favorites:", updatedUser?.externalFavorites);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("Error in external-favorite route:", e);
+    next(e);
+  }
+});
+
+// DELETE /images/external/:externalId/favorite → remove external favorite
+router.delete("/external/:externalId/favorite", requireAuth, async (req, res, next) => {
+  try {
+    console.log("Removing external favorite:", req.params.externalId);
+    console.log("User ID:", req.user.id);
+    
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { $pull: { externalFavorites: { externalId: req.params.externalId } } },
+      { new: true }
+    );
+
+    console.log("Updated user external favorites:", updatedUser?.externalFavorites);
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("Error in remove external favorite route:", e);
+    next(e);
+  }
+});
+
+// GET /images/all-favorites → get both internal and external favorites
+router.get("/all-favorites", requireAuth, async (req, res, next) => {
+  try {
+    console.log("Fetching all favorites for user:", req.user.id);
+    
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+    
+    const user = await User.findById(req.user.id).populate('favorites');
+    
+    if (!user) {
+      console.log("User not found with ID:", req.user.id);
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    console.log("User found:", !!user);
+    console.log("Internal favorites count:", user?.favorites?.length || 0);
+    console.log("External favorites count:", user?.externalFavorites?.length || 0);
+    
+    // Internal favorites (from database)
+    const internalFavorites = (user.favorites || []).map(fav => ({
+      ...fav.toJSON(),
+      type: 'internal'
+    }));
+    
+    // External favorites (from user.externalFavorites)
+    const externalFavorites = (user.externalFavorites || []).map(fav => ({
+      id: fav.externalId,
+      url: fav.url,
+      thumb: fav.thumb,
+      author: fav.author,
+      Title: fav.title,
+      type: 'external',
+      dateAdded: fav.dateAdded
+    }));
+
+    const allFavorites = [...internalFavorites, ...externalFavorites];
+    
+    res.json({ items: allFavorites });
+  } catch (e) {
+    console.error("Error in all-favorites route:", e);
+    next(e);
+  }
+});
+
+// DELETE /images/:id → delete (owner) - for internal images
 router.delete("/:id", requireAuth, async (req, res, next) => {
   try {
     const img = await Image.findById(req.params.id);
@@ -105,7 +283,7 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
     if (String(img.owner) !== req.user.id)
       return res.status(403).json({ message: "Not yours" });
 
-    await cloudinary.uploader.destroy(img.publicId);
+    await cloudinary.uploader.destroy(img.publicID);
     await img.deleteOne();
     res.json({ ok: true });
   } catch (e) {
@@ -113,11 +291,19 @@ router.delete("/:id", requireAuth, async (req, res, next) => {
   }
 });
 
-// ==================================================
-// POST /images/:id/favorite → add to user favorites
-// ==================================================
+// POST /images/:id/favorite → add internal image to favorites
 router.post("/:id/favorite", requireAuth, async (req, res, next) => {
   try {
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     await User.findByIdAndUpdate(
       req.user.id,
       { $addToSet: { favorites: req.params.id } },
@@ -129,11 +315,19 @@ router.post("/:id/favorite", requireAuth, async (req, res, next) => {
   }
 });
 
-// ===================================================
-// DELETE /images/:id/favorite → remove from favorites
-// ===================================================
+// DELETE /images/:id/favorite → remove internal image from favorites
 router.delete("/:id/favorite", requireAuth, async (req, res, next) => {
   try {
+    // Validate user ID format
+    if (!mongoose.Types.ObjectId.isValid(req.user.id)) {
+      return res.status(400).json({ message: "Invalid user ID" });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
     await User.findByIdAndUpdate(
       req.user.id,
       { $pull: { favorites: req.params.id } },

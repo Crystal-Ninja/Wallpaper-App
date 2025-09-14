@@ -8,13 +8,13 @@ const router=Router();
 
 router.post("/register",async(req,res,next)=>{
     try {
-        const {email,name,password}=req.body;
+        const {email,username,password}=req.body;
         const exists=await User.findOne({email});
         if(exists){
             return res.status(400).json({message:"email in use"});
         }
         const passwordHash=await bcrypt.hash(password,10);
-        const user=await User.create({name,passwordHash,email});
+        const user=await User.create({name:username,passwordHash,email});
         res.status(201).json({ id: user._id, email: user.email ,name:user.name});
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -22,6 +22,7 @@ router.post("/register",async(req,res,next)=>{
 
     } catch (e) {
         if (e.code === 11000) {
+            
             return res.status(400).json({ message: "Email already in use" });
         }
         next(e);

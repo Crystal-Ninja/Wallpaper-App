@@ -5,6 +5,7 @@ const router = Router();
 
 
 router.get("/", proAuth, async (req, res) => {
+  console.log("User from DB:", req.user); // 👈 check if name exists
   res.json({
     name: req.user.name,
     email: req.user.email,

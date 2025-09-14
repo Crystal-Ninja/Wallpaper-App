@@ -5,6 +5,7 @@ const userSchema = new mongoose.Schema(
         name:{
             type:String,
             trim:true,
+            required:true,
         },
         email:{
             type:String,
@@ -21,8 +22,19 @@ const userSchema = new mongoose.Schema(
         favorites:[
                 {
                     type:mongoose.Schema.Types.ObjectId,
-                    ref:"image",
+                    ref:"Image",
                 }
+        ],
+        externalFavorites:[
+            {
+                externalId: String,
+                url: String,
+                thumb: String,
+                author: String,
+                title: String,
+                source: { type: String, default: 'unsplash' },
+                dateAdded: { type: Date, default: Date.now }
+            }
         ],
         avatar: {
              type: String,

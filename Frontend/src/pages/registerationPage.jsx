@@ -30,7 +30,7 @@ export default function Register() {
         <h2 className="text-2xl font-bold text-center">Register</h2>
         <input
           type="text"
-          placeholder="Username"
+          placeholder="Name"
           className="w-full border p-2 rounded"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
