@@ -21,6 +21,8 @@ export default function ProfilePage() {
         });
         console.log("profile data",res.data)
         setProfile(res.data);
+              console.log(res.name)
+
       } catch (err) {
         console.error(err);
       }
@@ -31,16 +33,15 @@ export default function ProfilePage() {
   if (!profile) return <p className="text-center mt-10">Loading profile...</p>;
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-base-200">
-  <div className="bg-base-100 shadow-2xl rounded-3xl p-10 w-[420px] text-center transition transform hover:scale-[1.01] duration-300">
+    <div className="flex justify-center items-center min-h-screen bg-base-content">
+  <div className="bg-base-100 shadow-2xl  rounded-3xl p-10 w-[420px] text-center transition transform hover:scale-[1.01] duration-300">
     
     {/* Profile picture */}
+
     <div className="flex justify-center">
-      <img
-        src={profile.avatar || "https://via.placeholder.com/150"}
-        alt="Profile"
-        className="w-32 h-32 rounded-full border-4 border-primary shadow-md object-cover"
-      />
+      <div className="w-32 h-32 flex items-center justify-center  rounded-full border-4 border-primary shadow-md bg-primary  text-4xl font-bold">
+    {profile.name ? profile.name[0].toUpperCase() : "A"}
+      </div>
     </div>
 
     {/* Name */}

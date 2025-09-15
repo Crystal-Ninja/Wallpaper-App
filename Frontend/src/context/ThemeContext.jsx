@@ -18,11 +18,27 @@ export const ThemeProvider = ({ children }) => {
   const changeTheme = (newTheme) => {
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
+    // Apply theme to document
     document.documentElement.setAttribute('data-theme', newTheme);
+    
+    // Also handle dark class for compatibility
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   };
 
   useEffect(() => {
+    // Apply theme on mount and when theme changes
     document.documentElement.setAttribute('data-theme', theme);
+    
+    // Handle dark class for compatibility
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [theme]);
 
   return (

@@ -122,7 +122,7 @@ export default function MasonryGrid() {
   };
 
   return (
-    <div className="p-4 ml-20">
+    <div className="p-4 ml-20 bg-base-100 min-h-screen">
       {/* Search Bar */}
       <div className="flex justify-center mb-6">
         <input
@@ -130,12 +130,12 @@ export default function MasonryGrid() {
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
           placeholder="Search images..."
-          className="w-full max-w-xl px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="input input-bordered w-full max-w-xl"
           onKeyPress={(e) => e.key === 'Enter' && setQuery(searchText)}
         />
         <button
           onClick={() => setQuery(searchText)}
-          className="ml-2 px-4 py-2 bg-base-100 text-base-content rounded-lg shadow hover:bg-blue-600 transition"
+          className="btn btn-primary ml-2"
         >
           Search
         </button>
@@ -143,9 +143,13 @@ export default function MasonryGrid() {
 
       {/* Masonry Grid */}
       {loading ? (
-        <p className="text-center text-gray-500">Loading...</p>
+        <div className="flex justify-center items-center h-64">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
+        </div>
       ) : images.length === 0 ? (
-        <p className="text-center text-gray-500">No images found</p>
+        <div className="text-center py-20">
+          <p className="text-base-content/70 text-lg">No images found</p>
+        </div>
       ) : (
         <Masonry
           breakpointCols={breakpointColumnsObj}
@@ -165,7 +169,7 @@ export default function MasonryGrid() {
                   <img
                     src={img.thumb}
                     alt={img.author}
-                    className="w-full rounded-xl shadow-md hover:scale-[1.02] transition"
+                    className="w-full rounded-xl shadow-md hover:scale-[1.02] transition border border-base-300"
                   />
                 </a>
                 
@@ -175,20 +179,20 @@ export default function MasonryGrid() {
                     e.preventDefault();
                     toggleFavorite(img);
                   }}
-                  className={`absolute top-2 right-2 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 ${
+                  className={`absolute top-2 right-2 btn btn-sm btn-circle opacity-0 group-hover:opacity-100 transition-all duration-200 ${
                     isFavorite 
-                      ? 'bg-red-500 text-white shadow-lg' 
-                      : 'bg-white/90 text-gray-600 hover:text-red-500 hover:bg-white'
+                      ? 'btn-error text-white' 
+                      : 'btn-ghost bg-base-100/90 hover:btn-error'
                   }`}
                 >
                   <Heart 
-                    size={16} 
+                    size={32} 
                     fill={isFavorite ? "currentColor" : "none"} 
                   />
                 </button>
 
                 {/* Author info */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-base-300/90 to-transparent text-base-content p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
                   <p className="text-sm font-medium">by {img.author}</p>
                 </div>
               </div>

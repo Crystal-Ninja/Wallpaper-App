@@ -29,11 +29,11 @@ export default function SidebarMenu() {
   };
 
   return (
-    <div className="fixed left-0 top-0 h-screen w-20 bg-base-200 border-r border-base-300 flex flex-col items-center py-6 shadow-lg z-50">
+    <div className="fixed left-0 top-0 h-screen w-20 bg-base-200 border-r border-base-300 flex flex-col items-center py-6 shadow-lg z-50 transition-colors duration-200">
       {/* Logo */}
       <div className="avatar placeholder mb-8">
-        <div className="bg-primary text-primary-content rounded-full w-12">
-          <span className="text-xl font-bold">W</span>
+        <div className="bg-primary flex items-center justify-center text-primary-content rounded-full w-12 shadow-md hover:shadow-lg  transition-shadow duration-200">
+          <span className="text-xl font-bold">w</span>
         </div>
       </div>
       
@@ -45,11 +45,17 @@ export default function SidebarMenu() {
           <div key={item.id} className="tooltip tooltip-right" data-tip={item.label}>
             <button
               onClick={() => handleNavigation(item)}
-              className={`btn btn-ghost btn-square hover:btn-primary transition-all duration-200 ${
-                active === item.id ? "btn-primary" : ""
+              className={`btn btn-square transition-all duration-300 hover:scale-105 ${
+                active === item.id 
+                  ? "btn-primary shadow-lg" 
+                  : "btn-ghost hover:btn-primary hover:bg-primary/20 text-base-content hover:text-primary-content"
               }`}
             >
-              {item.icon}
+              <div className={`transition-colors duration-200 ${
+                active === item.id ? "text-primary-content" : ""
+              }`}>
+                {item.icon}
+              </div>
             </button>
           </div>
           ))}
@@ -66,15 +72,24 @@ export default function SidebarMenu() {
           <div key={item.id} className="tooltip tooltip-right" data-tip={item.label}>
             <button
               onClick={() => handleNavigation(item)}
-              className={`btn btn-ghost btn-square hover:btn-primary transition-all duration-200 ${
-                active === item.id ? "btn-primary" : ""
+              className={`btn btn-square transition-all duration-300 hover:scale-105 ${
+                active === item.id 
+                  ? "btn-primary shadow-lg" 
+                  : "btn-ghost hover:btn-primary hover:bg-primary/20 text-base-content hover:text-primary-content"
               }`}
             >
-              {item.icon}
+              <div className={`transition-colors duration-200 ${
+                active === item.id ? "text-primary-content" : ""
+              }`}>
+                {item.icon}
+              </div>
             </button>
           </div>
           ))}
       </nav>
+
+      {/* Optional: Theme indicator dot */}
+      <div className="w-2 h-2 bg-accent rounded-full opacity-60 mb-2"></div>
     </div>
   );
 }

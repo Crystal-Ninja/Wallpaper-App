@@ -62,7 +62,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-// POST /images → upload file
+// POST /images → upload file Not In Use
 router.post("/", requireAuth, upload.single("file"), async (req, res, next) => {
   try {
     if (!req.file) return res.status(400).json({ message: "No file" });

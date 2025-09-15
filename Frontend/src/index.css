@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 html, body, #root {
   width: 100vw;
   min-height: 100vh;
@@ -10,11 +11,27 @@ html, body, #root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Ensure DaisyUI themes work properly */
+[data-theme] {
+  color-scheme: light;
+}
+
+[data-theme="dark"], 
+[data-theme="synthwave"], 
+[data-theme="halloween"], 
+[data-theme="forest"], 
+[data-theme="black"], 
+[data-theme="luxury"], 
+[data-theme="dracula"], 
+[data-theme="night"],
+[data-theme="coffee"] {
+  color-scheme: dark;
 }
 
 /* Remove custom hard-coded colors so DaisyUI themes work */
@@ -39,5 +56,3 @@ button {
   font-family: inherit;
   cursor: pointer;
 }
-
-/* Remove prefers-color-scheme overrides since DaisyUI manages light/dark */
