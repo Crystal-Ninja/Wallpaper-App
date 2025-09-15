@@ -10,6 +10,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import SidebarMenu from "./components/menu.jsx";
 import { useLocation } from "react-router-dom";
 import { Navigate } from "react-router-dom";
+import { ThemeProvider } from "./context/ThemeContext.jsx";
 
 function Layout() {
   const location = useLocation();
@@ -71,8 +72,10 @@ function Layout() {
 
 export default function App() {
   return (
-    <Router>
-      <Layout />
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <Layout />
+      </Router>
+    </ThemeProvider>
   );
 }

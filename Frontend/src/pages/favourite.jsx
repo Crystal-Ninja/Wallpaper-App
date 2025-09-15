@@ -59,20 +59,20 @@ export default function Favourite() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <p className="text-gray-500">Loading favorites...</p>
+        <p className="text-base-content/70">Loading favorites...</p>
       </div>
     );
   }
 
   return (
     <div className="p-4 ml-20">
-      <h1 className="text-3xl font-bold mb-6 text-center">My Favorites</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center text-base-content">My Favorites</h1>
       
       {favorites.length === 0 ? (
         <div className="text-center py-20">
-          <Heart size={64} className="mx-auto text-gray-300 mb-4" />
-          <p className="text-gray-500 text-lg">No favorites yet</p>
-          <p className="text-gray-400">Start adding images to your favorites!</p>
+          <Heart size={64} className="mx-auto text-base-300 mb-4" />
+          <p className="text-base-content/70 text-lg">No favorites yet</p>
+          <p className="text-base-content/40">Start adding images to your favorites!</p>
         </div>
       ) : (
         <Masonry
@@ -103,7 +103,7 @@ export default function Favourite() {
               </div>
               
               {/* Image info */}
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent text-white p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-base-300/80 to-transparent text-base-content p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
                 {fav.Title || fav.title ? (
                   <p className="text-sm font-medium">{fav.Title || fav.title}</p>
                 ) : null}

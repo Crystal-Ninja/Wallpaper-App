@@ -8,10 +8,10 @@ export default function SidebarMenu() {
 
   // Menu items
   const menuItems = [
-    { id: "home", label: "Home", icon: <Home size={32} />, path: "/" },
-    { id: "profile", label: "Profile", icon: <User size={32} />, path: "/profile" },
-    { id: "favourite", label: "Favourite", icon: <Heart size={32} />, path: "/favourite" },
-    { id: "settings", label: "Settings", icon: <Settings size={32} />, path: "/settings", bottom: true },
+    { id: "home", label: "Home", icon: <Home size={24} />, path: "/" },
+    { id: "profile", label: "Profile", icon: <User size={24} />, path: "/profile" },
+    { id: "favourite", label: "Favourite", icon: <Heart size={24} />, path: "/favourite" },
+    { id: "settings", label: "Settings", icon: <Settings size={24} />, path: "/settings", bottom: true },
   ];
 
   const [active, setActive] = useState("home");
@@ -29,21 +29,29 @@ export default function SidebarMenu() {
   };
 
   return (
-    
-    <div className="fixed left-0 top-0 h-screen w-17 bg-white border-r border-gray-200 flex flex-col items-center py-6 shadow-md z-50">
+    <div className="fixed left-0 top-0 h-screen w-20 bg-base-200 border-r border-base-300 flex flex-col items-center py-6 shadow-lg z-50">
       {/* Logo */}
-      <div className="text-blue-600 font-bold text-2xl mb-10">A</div>
+      <div className="avatar placeholder mb-8">
+        <div className="bg-primary text-primary-content rounded-full w-12">
+          <span className="text-xl font-bold">W</span>
+        </div>
+      </div>
+      
       {/* Top Menu */}
-      <nav className="flex flex-col items-center gap-5">
+      <nav className="flex flex-col items-center gap-3">
         {menuItems
           .filter((item) => !item.bottom)
           .map((item) => (
-          <button key={item.id}
-          onClick={() => handleNavigation(item)}
-          className={`group relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${active === item.id
-          ? "bg-blue-500 text-white shadow-lg": "text-gray-500 hover:bg-gray-100 hover:text-gray-700"}`}>
-             <span className="shrink-0">{item.icon}</span>
-          </button>
+          <div key={item.id} className="tooltip tooltip-right" data-tip={item.label}>
+            <button
+              onClick={() => handleNavigation(item)}
+              className={`btn btn-ghost btn-square hover:btn-primary transition-all duration-200 ${
+                active === item.id ? "btn-primary" : ""
+              }`}
+            >
+              {item.icon}
+            </button>
+          </div>
           ))}
       </nav>
       
@@ -51,17 +59,20 @@ export default function SidebarMenu() {
       <div className="flex-1" />
         
       {/* Bottom Menu (settings only) */}
-      <nav className="flex flex-col items-center gap-5 mb-4">
+      <nav className="flex flex-col items-center gap-3 mb-4">
         {menuItems
           .filter((item) => item.bottom)
           .map((item) => (
-          <button key={item.id} onClick={() => handleNavigation(item)}
-            className={`group relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 ${
-            active === item.id
-            ? "bg-blue-500 text-white shadow-lg"
-            : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"}`}>
-            <span className="shrink-0">{item.icon}</span>
-          </button>
+          <div key={item.id} className="tooltip tooltip-right" data-tip={item.label}>
+            <button
+              onClick={() => handleNavigation(item)}
+              className={`btn btn-ghost btn-square hover:btn-primary transition-all duration-200 ${
+                active === item.id ? "btn-primary" : ""
+              }`}
+            >
+              {item.icon}
+            </button>
+          </div>
           ))}
       </nav>
     </div>
