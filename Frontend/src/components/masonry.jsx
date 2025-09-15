@@ -135,7 +135,7 @@ export default function MasonryGrid() {
         />
         <button
           onClick={() => setQuery(searchText)}
-          className="ml-2 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+          className="ml-2 px-4 py-2 bg-base-100 text-base-content rounded-lg shadow hover:bg-blue-600 transition"
         >
           Search
         </button>
