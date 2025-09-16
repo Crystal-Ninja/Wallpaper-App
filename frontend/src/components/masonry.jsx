@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Masonry from "react-masonry-css";
 import { Heart } from "lucide-react";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config/api.js";
 
 export default function MasonryGrid() {
   const [images, setImages] = useState([]);
@@ -15,18 +16,24 @@ export default function MasonryGrid() {
     try {
       setLoading(true);
       const res = await fetch(
-        `http://localhost:5000/external?query=${encodeURIComponent(q)}`
+        `${API_ENDPOINTS.EXTERNAL_IMAGES}?query=${encodeURIComponent(q)}`
       );
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
       const data = await res.json();
-      setImages(data.items);
+      setImages(data.items || []);
       
       // Check favorite status for each image (if user is logged in)
       const token = localStorage.getItem("token");
-      if (token) {
+      if (token && data.items?.length > 0) {
         checkFavoriteStatus(data.items);
       }
     } catch (err) {
       console.error("Error fetching images:", err);
+      setImages([]);
     } finally {
       setLoading(false);
     }
@@ -41,8 +48,11 @@ export default function MasonryGrid() {
       const statusPromises = imageList.map(async (img) => {
         try {
           const res = await axios.get(
-            `http://localhost:5000/images/external/${img.id}/is-favorite`,
-            { headers: { Authorization: `Bearer ${token}` } }
+            API_ENDPOINTS.EXTERNAL_FAVORITE_CHECK(img.id),
+            { 
+              headers: { Authorization: `Bearer ${token}` },
+              timeout: 5000
+            }
           );
           return { id: img.id, isFavorite: res.data.isFavorite };
         } catch (err) {
@@ -78,13 +88,14 @@ export default function MasonryGrid() {
 
       if (isFavorite) {
         // Remove from favorites
-        await axios.delete(`http://localhost:5000/images/external/${img.id}/favorite`, {
+        await axios.delete(API_ENDPOINTS.EXTERNAL_FAVORITE_REMOVE(img.id), {
           headers: { Authorization: `Bearer ${token}` },
+          timeout: 10000
         });
       } else {
         // Add to favorites
         await axios.post(
-          `http://localhost:5000/images/external-favorite`,
+          API_ENDPOINTS.EXTERNAL_FAVORITE,
           {
             externalId: img.id,
             url: img.url,
@@ -94,6 +105,7 @@ export default function MasonryGrid() {
           },
           {
             headers: { Authorization: `Bearer ${token}` },
+            timeout: 10000
           }
         );
       }
@@ -108,8 +120,10 @@ export default function MasonryGrid() {
       console.error("Error toggling favorite:", err);
       if (err.response?.status === 401) {
         alert("Please login to add favorites");
+      } else if (err.code === 'ECONNABORTED') {
+        alert("Request timed out. Please try again.");
       } else {
-        alert("Error updating favorite");
+        alert("Error updating favorite. Please try again.");
       }
     }
   };

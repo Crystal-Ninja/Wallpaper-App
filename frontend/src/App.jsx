@@ -6,9 +6,8 @@ import Settings from "./pages/Settings.jsx";
 import RegisterationPage from "./pages/registerationPage.jsx";
 import Login from "./pages/login.jsx";
 import PrivateRoute from "./utils/PrivateRoute.jsx";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import SidebarMenu from "./components/menu.jsx";
-import { useLocation } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext.jsx";
 
@@ -17,7 +16,6 @@ function Layout() {
 
   // Hide sidebar on login/register pages
   const hideSidebar = ["/login", "/register"].includes(location.pathname.toLowerCase());
-
 
   return (
     <div className="flex">
