@@ -6,9 +6,11 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
+    "build": "echo 'No build step required'",
+    "vercel-build": "echo 'Building for Vercel...'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["wallpaper", "api", "node", "express", "mongodb", "vercel"],
   "author": "",
   "license": "ISC",
   "description": "",
