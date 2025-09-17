@@ -28,25 +28,23 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = [
+    const allowedOrigins = ["    wallpaper-app-frontend.vercel.app",
       'http://localhost:5173',
       'http://localhost:3000',
       'http://127.0.0.1:5173',
       'http://127.0.0.1:3000',
     ];
     
-    // In production, allow same-origin requests and specific domains
+    
     if (process.env.NODE_ENV === 'production') {
-      // Allow same-origin requests (frontend and backend on same domain)
       return callback(null, true);
     }
     
-    // In development, check allowed origins
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       console.log('CORS blocked origin:', origin);
-      callback(null, true); // Allow for development - change to false for strict mode
+      callback(null, true); 
     }
   },
   credentials: true,
