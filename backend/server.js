@@ -23,47 +23,59 @@ app.set('trust proxy', 1);
 app.use('/static-images', express.static('./public/images'));
 
 // Enhanced CORS configuration
-const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
+
+const corsOpts = {
+    origin: [
       "https://wallpaper-app-frontend.vercel.app",
       'http://localhost:5173',
       'http://localhost:3000',
       'http://127.0.0.1:5173',
       'http://127.0.0.1:3000',
-    ];
-    
-    
-    if (process.env.NODE_ENV === 'production') {
-      return callback(null, true);
-    }
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.log('CORS blocked origin:', origin);
-      callback(null, true); 
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With',
-    'Accept',
-    'Origin'
-  ],
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+    ],
+    credentials: true,
 };
+app.use(cors(corsOpts));
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     // Allow requests with no origin (like mobile apps or curl requests)
+//     if (!origin) return callback(null, true);
 
-app.use(cors(corsOptions));
+//     const allowedOrigins = [
+//       "https://wallpaper-app-frontend.vercel.app",
+//       'http://localhost:5173',
+//       'http://localhost:3000',
+//       'http://127.0.0.1:5173',
+//       'http://127.0.0.1:3000',
+//     ];
+    
+    
+//     if (process.env.NODE_ENV === 'production') {
+//       return callback(null, true);
+//     }
+    
+//     if (allowedOrigins.indexOf(origin) !== -1) {
+//       callback(null, true);
+//     } else {
+//       console.log('CORS blocked origin:', origin);
+//       callback(null, true); 
+//     }
+//   },
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+//   allowedHeaders: [
+//     'Content-Type', 
+//     'Authorization', 
+//     'X-Requested-With',
+//     'Accept',
+//     'Origin'
+//   ],
+//   optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+// };
+
+// app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly
-app.options(/.*/, cors(corsOptions));
+// app.options(/.*/, cors(corsOptions));
 
 // Add request logging for debugging
 if (process.env.NODE_ENV !== 'production') {
@@ -118,6 +130,8 @@ app.use(async (req, res, next) => {
 });
 
 // API Routes
+
+
 app.use("/api/images", imagesRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/external", imageRoute);
