@@ -96,7 +96,7 @@ export default function Favourite() {
                 className="absolute top-2 right-2 btn btn-sm btn-circle btn-error text-white opacity-0 group-hover:opacity-100 transition-opacity"
                 title="Remove from favorites"
               >
-                <Trash2 size={16} />
+                <Trash2 size={32} />
               </button>
               
               {/* Image type indicator */}

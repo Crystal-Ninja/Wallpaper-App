@@ -47,6 +47,11 @@ export default function MasonryGrid() {
 
       const statusPromises = imageList.map(async (img) => {
         try {
+          if (img.id.startsWith("local")) {
+  // Skip backend check, just set favorite to false by default
+            return false;
+          }
+
           const res = await axios.get(
             API_ENDPOINTS.EXTERNAL_FAVORITE_CHECK(img.id),
             { 
@@ -195,7 +200,7 @@ export default function MasonryGrid() {
                   }}
                   className={`absolute top-2 right-2 btn btn-sm btn-circle opacity-0 group-hover:opacity-100 transition-all duration-200 ${
                     isFavorite 
-                      ? 'btn-error text-white' 
+                      ? 'btn-error text-pink-700' 
                       : 'btn-ghost bg-base-100/90 hover:btn-error'
                   }`}
                 >

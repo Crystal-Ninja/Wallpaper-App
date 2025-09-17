@@ -67,7 +67,7 @@ export default function ProfilePage() {
         {/* Profile picture */}
         <div className="flex justify-center">
           <div className="avatar placeholder">
-            <div className="w-32 bg-primary text-primary-content rounded-full flex items-center justify-center border-4 border-primary shadow-md">
+            <div className="w-32 h-30 bg-primary text-primary-content rounded-full flex items-center justify-center border-4 border-primary shadow-md">
               <span className="text-4xl font-bold">
                 {profile.name ? profile.name[0].toUpperCase() : "A"}
               </span>

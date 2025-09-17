@@ -64,7 +64,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Handle preflight requests explicitly
-// Option 1: regex (explicit preflight handler)
 app.options(/.*/, cors(corsOptions));
 
 // Add request logging for debugging
@@ -79,29 +78,44 @@ if (process.env.NODE_ENV !== 'production') {
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Global connection state
 let isConnected = false;
 
 const connectToDatabase = async () => {
-  if (isConnected) return;
+  if (isConnected) {
+    console.log('📊 Using existing database connection');
+    return;
+  }
   
   try {
+    console.log('🔌 Establishing database connection...');
     await ConnectDB(process.env.MONGO_URL);
     isConnected = true;
     console.log('✅ Database connected successfully');
   } catch (error) {
-    console.error('❌ Database connection failed:', error);
-    throw error;
+    console.error('❌ Database connection failed:', error.message);
+    // Don't throw error here - let the server start and retry later
+    console.log('⚠️  Server will continue without database connection');
   }
 };
 
+// Database middleware - but don't block server startup
 app.use(async (req, res, next) => {
-  try {
-    await connectToDatabase();
-    next();
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({ message: 'Database connection failed' });
+  if (!isConnected) {
+    try {
+      await connectToDatabase();
+    } catch (error) {
+      console.error('Database middleware error:', error.message);
+      // For critical database operations, return error
+      if (req.path.startsWith('/api/') && !req.path.includes('/health')) {
+        return res.status(503).json({ 
+          message: 'Database temporarily unavailable',
+          retry: true 
+        });
+      }
+    }
   }
+  next();
 });
 
 // API Routes
@@ -115,6 +129,7 @@ app.get("/health", (req, res) => {
   res.json({ 
     status: "ok", 
     message: "API is running", 
+    database: isConnected ? "connected" : "disconnected",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
     vercel: true,
@@ -127,6 +142,7 @@ app.get("/api", (req, res) => {
   res.json({ 
     ok: true, 
     message: "Wallpaper App API v1.0 - Vercel Deployment",
+    database: isConnected ? "connected" : "disconnected",
     endpoints: {
       auth: "/api/auth/login, /api/auth/register, /api/auth/logout",
       images: "/api/images/*",
@@ -163,16 +179,19 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
+// Start server and attempt database connection
 if (process.env.NODE_ENV !== 'production') {
-  connectToDatabase().then(() => {
-    app.listen(PORT, () => {
-      console.log(`🚀 API running locally on port ${PORT}`);
-      console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  // Start server first, then connect to database
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+    
+    // Attempt database connection after server starts
+    connectToDatabase().catch(err => {
+      console.error("Initial database connection failed:", err.message);
+      console.log("🔄 Will retry on first API request...");
     });
-  }).catch(err => {
-    console.error("Failed to start server:", err);
-    process.exit(1);
   });
 }
 

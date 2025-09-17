@@ -1,66 +1,26 @@
-// import mongoose from "mongoose";
-
-// export async function ConnectDB(uri) {
-//     mongoose.set("strictQuery",true);
-//     try {
-//         await mongoose.connect(uri);
-//         console.log("Mongodb connected")
-
-//     } catch (error) {
-//         console.log("mongodb connection error",error);
-//         throw error
-//     }
-// }
-
-// src/db.js - Updated for Vercel serverless
+// Alternative approach - Direct connection like the test script
 import mongoose from "mongoose";
 
-// Global connection cache for serverless
-let cachedConnection = null;
-
 export async function ConnectDB(uri) {
-  // If we have a cached connection, return it
-  if (cachedConnection && mongoose.connection.readyState === 1) {
-    console.log('Using cached database connection');
-    return cachedConnection;
-  }
-
   try {
-    console.log('Creating new database connection...');
+    console.log('🔌 Connecting to MongoDB...');
     
-    // Configure mongoose for serverless
+    // Use the exact same approach as the working test script
     mongoose.set("strictQuery", true);
     
-    // Connection options optimized for serverless
-    const options = {
-      bufferCommands: false,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-      maxIdleTimeMS: 30000,
+    const connection = await mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 10000,
       connectTimeoutMS: 10000,
-    };
-
-    const connection = await mongoose.connect(uri, options);
-    
-    // Cache the connection
-    cachedConnection = connection;
+    });
     
     console.log("✅ MongoDB connected successfully");
+    console.log("Database name:", mongoose.connection.name);
+    console.log("Connection state:", mongoose.connection.readyState);
+    
     return connection;
     
   } catch (error) {
     console.error("❌ MongoDB connection error:", error);
-    cachedConnection = null;
     throw error;
   }
 }
-
-// Graceful shutdown handler
-process.on('SIGINT', async () => {
-  if (cachedConnection) {
-    await mongoose.connection.close();
-    console.log('Database connection closed through app termination');
-  }
-  process.exit(0);
-});
