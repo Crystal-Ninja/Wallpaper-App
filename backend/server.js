@@ -20,7 +20,6 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Serve static images
-app.use('/static-images', express.static('./public/images'));
 
 // Enhanced CORS configuration
 
@@ -76,6 +75,7 @@ app.use(cors(corsOpts));
 
 // Handle preflight requests explicitly
 // app.options(/.*/, cors(corsOptions));
+app.use('/static-images', express.static('./public/images'));
 
 // Add request logging for debugging
 if (process.env.NODE_ENV !== 'production') {
