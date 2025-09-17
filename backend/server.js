@@ -19,35 +19,35 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-// Define allowed origins
-const allowedOrigins = [
-  "https://wallpaper-app-frontend.vercel.app", // your Vercel frontend
-  "http://localhost:5173", // Vite dev server
-  "http://127.0.0.1:5173", // alternative localhost
-  "http://localhost:3000", // React default
-  "http://127.0.0.1:3000"
-];
+// // Define allowed origins
+// const allowedOrigins = [
+//   "https://wallpaper-app-frontend.vercel.app", // your Vercel frontend
+//   "http://localhost:5173", // Vite dev server
+//   "http://127.0.0.1:5173", // alternative localhost
+//   "http://localhost:3000", // React default
+//   "http://127.0.0.1:3000"
+// ];
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // allow requests with no origin (like curl, Postman, or same-origin)
-    if (!origin) return callback(null, true);
+// const corsOptions = {
+//   origin: function (origin, callback) {
+//     // allow requests with no origin (like curl, Postman, or same-origin)
+//     if (!origin) return callback(null, true);
 
-    // explicitly allow localhost:5173 while testing
-    if (
-      allowedOrigins.includes(origin) ||
-      origin.startsWith("http://localhost:")
-    ) {
-      callback  (null, true);
-    } else {
-      console.log("🚫 CORS blocked origin:", origin);
-      return callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
-};
+//     // explicitly allow localhost:5173 while testing
+//     if (
+//       allowedOrigins.includes(origin) ||
+//       origin.startsWith("http://localhost:")
+//     ) {
+//       callback  (null, true);
+//     } else {
+//       console.log("🚫 CORS blocked origin:", origin);
+//       return callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true,
+//   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+//   allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
+// };
 
 // Serve static images
 app.use('/static-images', express.static(path.join(__dirname, 'public/images')));
@@ -60,7 +60,7 @@ app.use((req, res, next) => {
 });
 
 // Enable CORS before routes
-app.use(cors(corsOptions));
+app.use(cors());
 // app.options("/*", cors(corsOptions)); // handle preflight globally
 
 
