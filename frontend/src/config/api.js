@@ -4,7 +4,7 @@ const isProduction = import.meta.env.MODE === 'production';
 const config = {
   development: {
     // For local development, backend runs on different port
-    API_BASE_URL: 'http://localhost:5000/api',
+    API_BASE_URL: 'wallpaper-app-backend-nu.vercel.app',
     NODE_ENV: 'development'
   },
   production: {
