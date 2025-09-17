@@ -4,11 +4,11 @@ const isProduction = import.meta.env.MODE === 'production';
 const config = {
   development: {
     // For local development, backend runs on different port
-    API_BASE_URL: 'http://localhost:5000',
+    API_BASE_URL: 'http://localhost:5000/api',
     NODE_ENV: 'development'
   },
   production: {
-    // For production monorepo, both are on same domain with /api prefix
+    // For production, use your deployed backend URL
     API_BASE_URL: 'https://wallpaper-app-backend-nu.vercel.app/api',
     NODE_ENV: 'production'
   }
@@ -29,8 +29,9 @@ console.log('API Configuration:', {
 
 // Enhanced helper function for API calls
 export const apiCall = async (endpoint, options = {}) => {
-  // Construct full URL
-  const url = endpoint.startsWith('http') ? endpoint : `${API_BASE_URL}${endpoint}`;
+  // Remove leading slash if present since API_BASE_URL already includes /api
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
+  const url = `${API_BASE_URL}/${cleanEndpoint}`;
   
   const defaultOptions = {
     headers: {
@@ -61,7 +62,7 @@ export const apiCall = async (endpoint, options = {}) => {
   }
 };
 
-// API endpoints - all properly configured
+// API endpoints - Fixed to match your backend routes
 export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/auth/login`,
@@ -83,7 +84,9 @@ export const API_ENDPOINTS = {
   INTERNAL_FAVORITE_REMOVE: (id) => `${API_BASE_URL}/images/${id}/favorite`,
   
   // Health check (direct route, not under /api)
-  HEALTH: isProduction ? '/health' : 'http://localhost:5000/health'
+  HEALTH: isProduction 
+    ? 'https://wallpaper-app-backend-nu.vercel.app/health' 
+    : 'http://localhost:5000/health'
 };
 
 // Export for debugging
