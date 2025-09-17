@@ -9,7 +9,7 @@ const config = {
   },
   production: {
     // For production monorepo, both are on same domain with /api prefix
-    API_BASE_URL: 'wallpaper-app-backend-nu.vercel.app/api',
+    API_BASE_URL: 'https://wallpaper-app-backend-nu.vercel.app/api',
     NODE_ENV: 'production'
   }
 };
