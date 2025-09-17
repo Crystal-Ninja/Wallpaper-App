@@ -38,7 +38,7 @@ const corsOptions = {
       allowedOrigins.includes(origin) ||
       origin.startsWith("http://localhost:")
     ) {
-      callback(null, true);
+      callback  (null, true);
     } else {
       console.log("🚫 CORS blocked origin:", origin);
       return callback(new Error("Not allowed by CORS"));
