@@ -19,63 +19,50 @@ const app = express();
 
 app.set('trust proxy', 1);
 
-// FIXED: Enhanced CORS configuration
+// Define allowed origins
+const allowedOrigins = [
+  "https://wallpaper-app-frontend.vercel.app", // your Vercel frontend
+  "http://localhost:5173", // Vite dev server
+  "http://127.0.0.1:5173", // alternative localhost
+  "http://localhost:3000", // React default
+  "http://127.0.0.1:3000"
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // allow requests with no origin (like curl, Postman, or same-origin)
     if (!origin) return callback(null, true);
 
-    const allowedOrigins = [
-      "https://wallpaper-app-frontend.vercel.app",
-      'http://localhost:5173',
-      'http://localhost:3000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:3000',
-      'https://localhost:5173', // HTTPS localhost
-    ];
-    
-    // In production, be more permissive for Vercel deployments
-    if (process.env.NODE_ENV === 'production') {
-      // Allow any vercel.app subdomain
-      if (origin && (origin.includes('.vercel.app') || allowedOrigins.includes(origin))) {
-        return callback(null, true);
-      }
+    // explicitly allow localhost:5173 while testing
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.startsWith("http://localhost:")
+    ) {
+      callback(null, true);
     } else {
-      // In development, allow localhost
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+      console.log("🚫 CORS blocked origin:", origin);
+      return callback(new Error("Not allowed by CORS"));
     }
-    
-    console.log('CORS allowed origin:', origin);
-    callback(null, true); // Allow all origins for now to debug
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type', 
-    'Authorization', 
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'Access-Control-Request-Method',
-    'Access-Control-Request-Headers'
-  ],
-  optionsSuccessStatus: 200
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin"],
 };
 
-app.use(cors(corsOptions));
-
 // Serve static images
-app.use('/static-images', express.static('./public/images'));
+app.use('/static-images', express.static(path.join(__dirname, 'public/images')));
 
 // Add request logging for debugging
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - ${new Date().toISOString()}`);
   console.log('Origin:', req.headers.origin);
-  console.log('User-Agent:', req.headers['user-agent']);
   next();
 });
+
+// Enable CORS before routes
+app.use(cors(corsOptions));
+// app.options("/*", cors(corsOptions)); // handle preflight globally
+
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -118,7 +105,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// FIXED: API Routes with proper /api prefix
+// API Routes with proper /api prefix
 app.use("/api/images", imagesRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/external", imageRoute);
@@ -132,7 +119,6 @@ app.get("/health", (req, res) => {
     database: isConnected ? "connected" : "disconnected",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    vercel: true,
     cors: "enabled"
   });
 });
@@ -141,7 +127,7 @@ app.get("/health", (req, res) => {
 app.get("/api", (req, res) => {
   res.json({ 
     ok: true, 
-    message: "Wallpaper App API v1.0 - Vercel Deployment",
+    message: "Wallpaper App API v1.0",
     database: isConnected ? "connected" : "disconnected",
     endpoints: {
       auth: "/api/auth/login, /api/auth/register, /api/auth/logout",
@@ -150,7 +136,7 @@ app.get("/api", (req, res) => {
       profile: "/api/profile",
       health: "/health"
     },
-    deployment: "vercel-monorepo"
+    cors: "enabled"
   });
 });
 
@@ -163,25 +149,6 @@ app.get("/", (req, res) => {
     api: "/api"
   });
 });
-
-// // Catch-all for API routes - Fixed pattern
-// app.use('/api', (req, res, next) => {
-//   // Only handle if no other route matched
-//   if (res.headersSent) return next();
-  
-//   res.status(404).json({ 
-//     message: 'API route not found',
-//     path: req.originalUrl,
-//     available_endpoints: [
-//       '/api/auth/login',
-//       '/api/auth/register', 
-//       '/api/images/*',
-//       '/api/external',
-//       '/api/profile',
-//       '/health'
-//     ]
-//   });
-// });
 
 // Global error handler
 app.use((err, req, res, next) => {
@@ -201,19 +168,17 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 // Start server and attempt database connection
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-    console.log(`🔗 API: http://localhost:${PORT}/api`);
-    
-    // Attempt database connection after server starts
-    connectToDatabase().catch(err => {
-      console.error("Initial database connection failed:", err.message);
-      console.log("🔄 Will retry on first API request...");
-    });
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔗 API: http://localhost:${PORT}/api`);
+  
+  // Attempt database connection after server starts
+  connectToDatabase().catch(err => {
+    console.error("Initial database connection failed:", err.message);
+    console.log("🔄 Will retry on first API request...");
   });
-}
+});
 
 export default app;
