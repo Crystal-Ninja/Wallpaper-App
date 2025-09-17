@@ -28,7 +28,8 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    const allowedOrigins = ["    wallpaper-app-frontend.vercel.app",
+    const allowedOrigins = [
+      "https://wallpaper-app-frontend.vercel.app",
       'http://localhost:5173',
       'http://localhost:3000',
       'http://127.0.0.1:5173',
