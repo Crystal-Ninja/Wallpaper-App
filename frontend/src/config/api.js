@@ -4,12 +4,12 @@ const isProduction = import.meta.env.MODE === 'production';
 const config = {
   development: {
     // For local development, backend runs on different port
-    API_BASE_URL: 'wallpaper-app-backend-nu.vercel.app',
+    API_BASE_URL: 'http://localhost:5000',
     NODE_ENV: 'development'
   },
   production: {
     // For production monorepo, both are on same domain with /api prefix
-    API_BASE_URL: '/api',
+    API_BASE_URL: 'https://wallpaper-app-frontend.vercel.app',
     NODE_ENV: 'production'
   }
 };
