@@ -102,10 +102,7 @@ export default function MasonryGrid() {
       }
 
       // Don't allow favoriting local images for now (they don't have backend support)
-      if (img.id.startsWith("local") || img.type === "local") {
-        alert("Local images cannot be favorited yet");
-        return;
-      }
+
 
       const isFavorite = favoriteStatus[img.id] || false;
 

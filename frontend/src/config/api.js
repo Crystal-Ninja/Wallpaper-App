@@ -25,7 +25,7 @@ export const API_ENDPOINTS = {
   INTERNAL_FAVORITE_REMOVE: (id) => `${API_BASE_URL}/images/${id}/favorite`,
 
   HEALTH: isProduction
-    ? "https://wallpaper-app-backend-rust.vercel.app/health"
+    ? "https://wallpaper-app-1-9rq5.onrender.com/api/health"
     : "http://localhost:5000/health",
 };
 
