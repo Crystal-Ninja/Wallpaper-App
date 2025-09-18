@@ -2,7 +2,7 @@
 const isProduction = import.meta.env.VITE_ENV === 'production' || import.meta.env.MODE === 'production';
 
 const API_BASE_URL = isProduction
-  ? "https://wallpaper-app-backend-rust.vercel.app/api"
+  ? "https://wallpaper-app-1-9rq5.onrender.com/api"
   : "http://localhost:5000/api";
 
 export const API_ENDPOINTS = {
