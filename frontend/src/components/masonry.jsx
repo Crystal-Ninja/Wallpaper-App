@@ -10,6 +10,18 @@ export default function MasonryGrid() {
   const [query, setQuery] = useState("");
   const [searchText, setSearchText] = useState("");
   const [favoriteStatus, setFavoriteStatus] = useState({});
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768 || /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch images from backend API
   async function fetchImages(q) {
@@ -47,9 +59,9 @@ export default function MasonryGrid() {
 
       const statusPromises = imageList.map(async (img) => {
         try {
-          if (img.id.startsWith("local")) {
-  // Skip backend check, just set favorite to false by default
-            return false;
+          // Skip backend check for local images, just set favorite to false by default
+          if (img.id.startsWith("local") || img.type === "local") {
+            return { id: img.id, isFavorite: false };
           }
 
           const res = await axios.get(
@@ -86,6 +98,12 @@ export default function MasonryGrid() {
       const token = localStorage.getItem("token");
       if (!token) {
         alert("Please login to add favorites");
+        return;
+      }
+
+      // Don't allow favoriting local images for now (they don't have backend support)
+      if (img.id.startsWith("local") || img.type === "local") {
+        alert("Local images cannot be favorited yet");
         return;
       }
 
@@ -184,34 +202,52 @@ export default function MasonryGrid() {
                   href={img.link}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="block"
                 >
                   <img
                     src={img.thumb}
                     alt={img.author}
                     className="w-full rounded-xl shadow-md hover:scale-[1.02] transition border border-base-300"
+                    loading="lazy"
                   />
                 </a>
                 
-                {/* Favorite button */}
+                {/* Favorite button - Always visible on mobile, hover on desktop */}
                 <button
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
                     toggleFavorite(img);
                   }}
-                  className={`absolute top-2 right-2 btn btn-sm btn-circle opacity-0 group-hover:opacity-100 transition-all duration-200 ${
+                  className={`absolute top-2 right-2 btn btn-sm btn-circle transition-all duration-200 ${
+                    isMobile 
+                      ? 'opacity-80' // Always visible on mobile
+                      : 'opacity-0 group-hover:opacity-100' // Hover on desktop
+                  } ${
                     isFavorite 
-                      ? 'btn-error text-pink-700' 
+                      ? 'btn-error text-white' 
                       : 'btn-ghost bg-base-100/90 hover:btn-error'
                   }`}
                 >
                   <Heart 
-                    size={32} 
+                    size={16} 
                     fill={isFavorite ? "currentColor" : "none"} 
                   />
                 </button>
 
-                {/* Author info */}
-                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-base-300/90 to-transparent text-base-content p-3 rounded-b-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Image type indicator - show if local image */}
+                {(img.id.startsWith("local") || img.type === "local") && (
+                  <div className={`absolute top-2 left-2 badge badge-primary badge-sm transition-opacity ${
+                    isMobile ? 'opacity-80' : 'opacity-0 group-hover:opacity-100'
+                  }`}>
+                    Local
+                  </div>
+                )}
+
+                {/* Author info - Always show on mobile, hover on desktop */}
+                <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-base-300/90 to-transparent text-base-content p-3 rounded-b-xl transition-opacity ${
+                  isMobile ? 'opacity-80' : 'opacity-0 group-hover:opacity-100'
+                }`}>
                   <p className="text-sm font-medium">by {img.author}</p>
                 </div>
               </div>

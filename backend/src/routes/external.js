@@ -18,7 +18,7 @@ const defaultImages = [
   { id: "local8", url: "japan.jpeg", thumb: "japan.jpeg", author: "Local", link: "#" },
   { id: "local9", url: "grass.jpeg", thumb: "grass.jpeg", author: "Local", link: "#" },
   { id: "local10", url: "lamp.jpeg", thumb: "lamp.jpeg", author: "Local", link: "#" },
-  { id: "local1", url: "sheep.jpeg", thumb: "sheep.jpeg", author: "Local", link: "#" },  
+  { id: "local11", url: "sheep.jpeg", thumb: "sheep.jpeg", author: "Local", link: "#" },  
   { id: "local12", url: "wallpaper.jpeg", thumb: "wallpaper.jpeg", author: "Local", link: "#" },
   { id: "local13", url: "yello.jpeg", thumb: "yello.jpeg", author: "Local", link: "#" },
   { id: "local14", url: "car.jpeg", thumb: "car.jpeg", author: "Local", link: "#" },
@@ -32,46 +32,65 @@ const defaultImages = [
   { id: "local23", url: "spidy.jpeg", thumb: "spidy.jpeg", author: "Local", link: "#" },
   { id: "local24", url: "cherry.jpeg", thumb: "cherry.jpeg", author: "Local", link: "#" },
   { id: "local25", url: "window.jpeg", thumb: "window.jpeg", author: "Local", link: "#" },
-  { id: "local26", url: "tree.jpeg", thumb: "op.jpeg", author: "Local", link: "#" },
-  { id: "local27", url: "rdr.jpeg", thumb: "op.jpeg", author: "Local", link: "#" },
-  { id: "local28", url: "bug.jpeg", thumb: "op.jpeg", author: "Local", link: "#" },
+  { id: "local26", url: "tree.jpeg", thumb: "tree.jpeg", author: "Local", link: "#" },
+  { id: "local27", url: "rdr.jpeg", thumb: "rdr.jpeg", author: "Local", link: "#" },
+  { id: "local28", url: "bug.jpeg", thumb: "bug.jpeg", author: "Local", link: "#" },
   { id: "local29", url: "op.jpeg", thumb: "op.jpeg", author: "Local", link: "#" },
-
 ];
+
 router.get("/", async (req, res, next) => {
   try {
     const { query = "", page = 1, per_page = 20 } = req.query;
 
-    // Build base URL (e.g. http://localhost:5000)
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    // Use production URL for images when deployed
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? "https://wallpaper-app-1-9rq5.onrender.com"  // Your backend URL
+      : `${req.protocol}://${req.get("host")}`;
 
     // Update local images to use full URLs
     const localImages = defaultImages.map(img => ({
       ...img,
       url: `${baseUrl}/static-images/${img.url}`,
-      thumb: `${baseUrl}/static-images/${img.url}`
+      thumb: `${baseUrl}/static-images/${img.url}`,
+      type: "local" // Add type for easier identification
     }));
 
     if (!query) {
       return res.json({ items: localImages });
     }
 
-    const r = await axios.get("https://api.unsplash.com/search/photos", {
-      params: { query, page, per_page },
-      headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` }
-    });
+    // Search Unsplash if query provided
+    if (!UNSPLASH_KEY) {
+      console.warn("UNSPLASH_ACCESS_KEY not configured, returning local images only");
+      return res.json({ items: localImages });
+    }
 
-    const unsplashItems = r.data.results.map(x => ({
-      id: x.id,
-      url: x.urls.regular,
-      thumb: x.urls.regular,
-      author: x.user.name,
-      link: x.links.html,
-      type:"external",
-    }));
-    res.json({ items:unsplashItems });
+    try {
+      const r = await axios.get("https://api.unsplash.com/search/photos", {
+        params: { query, page, per_page },
+        headers: { Authorization: `Client-ID ${UNSPLASH_KEY}` },
+        timeout: 10000 // 10 second timeout
+      });
+
+      const unsplashItems = r.data.results.map(x => ({
+        id: x.id,
+        url: x.urls.regular,
+        thumb: x.urls.regular,
+        author: x.user.name,
+        link: x.links.html,
+        type: "external",
+      }));
+
+      res.json({ items: unsplashItems });
+    } catch (unsplashError) {
+      console.error("Unsplash API error:", unsplashError.message);
+      // Fallback to local images if Unsplash fails
+      res.json({ items: localImages });
+    }
   } catch (e) {
+    console.error("External route error:", e);
     next(e);
   }
 });
-export default router
+
+export default router;
