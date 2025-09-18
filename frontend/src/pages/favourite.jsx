@@ -4,9 +4,12 @@ import Masonry from "react-masonry-css";
 import { Heart, Trash2 } from "lucide-react";
 import { API_ENDPOINTS } from "../config/api.js";
 
+
+
 export default function Favourite() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     fetchFavorites();
@@ -25,6 +28,21 @@ export default function Favourite() {
       setLoading(false);
     }
   };
+  useEffect(() => {
+  const checkMobile = () => {
+    setIsMobile(
+      window.innerWidth <= 768 ||
+      /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent
+      )
+    );
+  };
+
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
+  return () => window.removeEventListener("resize", checkMobile);
+}, []);
+
 
   const removeFavorite = async (favorite) => {
     try {
@@ -93,11 +111,17 @@ export default function Favourite() {
               {/* Remove from favorites button */}
               <button
                 onClick={() => removeFavorite(fav)}
-                className="absolute top-2 right-2 btn btn-sm btn-circle btn-error text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className={`absolute top-2 right-2 btn btn-circle btn-error text-white transition-all duration-200 
+                  ${isMobile 
+                    ? 'opacity-90'   // always visible on mobile
+                    : 'opacity-0 group-hover:opacity-100'}
+                `}
+                style={{ width: "40px", height: "40px" }} // touch-friendly
                 title="Remove from favorites"
               >
                 <Trash2 size={32} />
               </button>
+
               
               {/* Image type indicator */}
               <div className="absolute top-2 left-2 badge badge-primary badge-sm opacity-0 group-hover:opacity-100 transition-opacity">

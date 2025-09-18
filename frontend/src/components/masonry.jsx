@@ -26,6 +26,7 @@ export default function MasonryGrid() {
   // Fetch images from backend API
   async function fetchImages(q) {
     try {
+      
       setLoading(true);
       const res = await fetch(
         `${API_ENDPOINTS.EXTERNAL_IMAGES}?query=${encodeURIComponent(q)}`
@@ -36,7 +37,17 @@ export default function MasonryGrid() {
       }
       
       const data = await res.json();
-      setImages(data.items || []);
+
+      // merge old + new
+      setImages((prev) => {
+        const seen = new Set();
+        return [...prev, ...(data.items || [])].filter((img) => {
+          if (seen.has(img.id)) return false; // duplicate → skip
+          seen.add(img.id);
+          return true;
+        });
+      });
+
       
       // Check favorite status for each image (if user is logged in)
       const token = localStorage.getItem("token");
@@ -216,21 +227,22 @@ export default function MasonryGrid() {
                     e.stopPropagation();
                     toggleFavorite(img);
                   }}
-                  className={`absolute top-2 right-2 btn btn-sm btn-circle transition-all duration-200 ${
-                    isMobile 
-                      ? 'opacity-80' // Always visible on mobile
-                      : 'opacity-0 group-hover:opacity-100' // Hover on desktop
-                  } ${
-                    isFavorite 
-                      ? 'btn-error text-white' 
-                      : 'btn-ghost bg-base-100/90 hover:btn-error'
-                  }`}
+                  className={`absolute top-2 right-2 btn btn-circle transition-all duration-200 
+                    ${isMobile 
+                      ? 'opacity-90'   // always visible on mobile
+                      : 'opacity-0 group-hover:opacity-100'} 
+                    ${isFavorite 
+                      ? 'btn-error text-pink-800' 
+                      : 'btn-ghost bg-base-100/90 hover:btn-error'}
+                  `}
+                  style={{ width: "40px", height: "40px" }} // bigger tap target
                 >
                   <Heart 
-                    size={16} 
+                    size={32} // slightly bigger
                     fill={isFavorite ? "currentColor" : "none"} 
                   />
                 </button>
+
 
                 {/* Image type indicator - show if local image */}
                 {(img.id.startsWith("local") || img.type === "local") && (
