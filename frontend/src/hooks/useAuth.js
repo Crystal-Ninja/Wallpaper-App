@@ -5,20 +5,11 @@ export function useAuth() {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
-  // Load user if token exists
   useEffect(() => {
-    if (token) {
-      const savedUser = localStorage.getItem("user");
-      if (savedUser) {
-        try {
-          setUser(JSON.parse(savedUser));
-        } catch (err) {
-          console.error("Error parsing saved user:", err);
-          localStorage.removeItem("user");
-        }
-      }
-    }
-  }, [token]);
+  if (token) {
+    checkAuth();
+  }
+}, [token, checkAuth]);
 
   // Register new user
   const register = useCallback(async (email, password, name) => {
@@ -109,6 +100,36 @@ export function useAuth() {
     },
     [token, logout]
   );
+  // Check login status from backend
+const checkAuth = useCallback(async () => {
+  try {
+    const res = await fetch(API_ENDPOINTS.ME, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      credentials: "include", // ensure cookies/session are sent
+    });
 
-  return { user, token, register, login, logout, authFetch };
+    if (!res.ok) throw new Error("Not authenticated");
+    const data = await res.json();
+
+    if (data?.user) {
+      setUser(data.user);
+      return data.user;
+    } else {
+      logout();
+      return null;
+    }
+  } catch (err) {
+    console.error("checkAuth failed:", err.message);
+    logout();
+    return null;
+  }
+}, [logout]);
+
+
+  return { user, token, register, login, logout, authFetch,checkAuth };
 }
