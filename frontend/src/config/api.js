@@ -9,7 +9,7 @@ const config = {
   },
   production: {
     // For production, use your deployed backend URL
-    API_BASE_URL: 'https://wallpaper-app-backend-nu.vercel.app/api',
+    API_BASE_URL: 'https://wallpaper-app-backend-rust.vercel.app/api',
     NODE_ENV: 'production' 
   }
 };
