@@ -39,7 +39,7 @@ export const apiCall = async (endpoint, options = {}) => {
       ...options.headers
     },
     mode: 'cors', // Explicitly set CORS mode
-    credentials: 'omit', // Don't send credentials for now
+    credentials: 'include', // Don't send credentials for now
     ...options
   };
 

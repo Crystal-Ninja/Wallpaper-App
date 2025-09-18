@@ -30,15 +30,17 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, Postman)
     if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("🚫 CORS blocked origin:", origin);
-      callback(null, true); // Allow for now, change to false for production
+
+    if (
+      allowedOrigins.includes(origin) ||
+      origin.startsWith("http://localhost:")
+    ) {
+      return callback(null, true);
     }
+
+    console.log("🚫 CORS blocked origin:", origin);
+    return callback(null, false); // Reject instead of forcing true
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
@@ -47,15 +49,13 @@ const corsOptions = {
     "Authorization", 
     "X-Requested-With", 
     "Accept", 
-    "Origin",
-    "Access-Control-Allow-Origin"
+    "Origin"
   ],
-  preflightContinue: false,
   optionsSuccessStatus: 204
 };
 
-// Enable CORS globally before any routes
 app.use(cors(corsOptions));
+
 
 // Serve static images
 app.use('/static-images', express.static(path.join(__dirname, 'public/images')));
