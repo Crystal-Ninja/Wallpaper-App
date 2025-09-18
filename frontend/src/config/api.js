@@ -27,9 +27,8 @@ console.log('API Configuration:', {
   API_BASE_URL
 });
 
-// Enhanced helper function for API calls
+// Enhanced helper function for API calls with better error handling
 export const apiCall = async (endpoint, options = {}) => {
-  // Remove leading slash if present since API_BASE_URL already includes /api
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
   const url = `${API_BASE_URL}/${cleanEndpoint}`;
   
@@ -39,8 +38,8 @@ export const apiCall = async (endpoint, options = {}) => {
       'Accept': 'application/json',
       ...options.headers
     },
-    // Add credentials for CORS
-    credentials: 'include',
+    mode: 'cors', // Explicitly set CORS mode
+    credentials: 'omit', // Don't send credentials for now
     ...options
   };
 
@@ -49,20 +48,31 @@ export const apiCall = async (endpoint, options = {}) => {
     const response = await fetch(url, defaultOptions);
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ 
-        message: `HTTP ${response.status}: ${response.statusText}` 
-      }));
+      const errorData = await response.text().then(text => {
+        try {
+          return JSON.parse(text);
+        } catch {
+          return { message: text || `HTTP ${response.status}: ${response.statusText}` };
+        }
+      });
       throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
     }
     
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
     console.error('API call failed:', { url, error: error.message });
+    
+    // More specific error messages
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error - please check your internet connection');
+    }
+    
     throw error;
   }
 };
 
-// API endpoints - Fixed to match your backend routes
+// API endpoints - Remove duplicate API_BASE_URL
 export const API_ENDPOINTS = {
   // Auth endpoints
   LOGIN: `${API_BASE_URL}/auth/login`,
@@ -83,7 +93,7 @@ export const API_ENDPOINTS = {
   INTERNAL_FAVORITE_ADD: (id) => `${API_BASE_URL}/images/${id}/favorite`,
   INTERNAL_FAVORITE_REMOVE: (id) => `${API_BASE_URL}/images/${id}/favorite`,
   
-  // Health check (direct route, not under /api)
+  // Health check (note: health is not under /api)
   HEALTH: isProduction 
     ? 'https://wallpaper-app-backend-nu.vercel.app/health' 
     : 'http://localhost:5000/health'
