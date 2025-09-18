@@ -4,7 +4,7 @@ import express from "express";
 import path from "path";
 import { ConnectDB } from "./src/db.js";
 import { fileURLToPath } from 'url';
-import authRouter from "./src/middleware/auth.js";
+import authRouter from "./src/routes/auth.js";
 import imagesRouter from "./src/routes/images.js";
 import imageRoute from "./src/routes/external.js";
 import profileRoute from "./src/routes/profile.js"
