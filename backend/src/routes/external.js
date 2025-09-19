@@ -62,7 +62,7 @@ router.get("/", async (req, res, next) => {
     // Search Unsplash if query provided
     if (!UNSPLASH_KEY) {
       console.warn("UNSPLASH_ACCESS_KEY not configured, returning local images only");
-      return res.json({ items: localImages });
+      return res.json({ items: [localImages] });
     }
 
     try {
@@ -85,7 +85,7 @@ router.get("/", async (req, res, next) => {
     } catch (unsplashError) {
       console.error("Unsplash API error:", unsplashError.message);
       // Fallback to local images if Unsplash fails
-      res.json({ items: localImages });
+      res.json({ items: [localImages] });
     }
   } catch (e) {
     console.error("External route error:", e);

@@ -22,6 +22,13 @@ export default function MasonryGrid() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+  useEffect(() => {
+  if (query) {
+    setImages([]); // ✅ clear local images when searching
+  }
+  fetchImages(query);
+}, [query]);
+
 
   // Fetch images from backend API
   async function fetchImages(q) {
@@ -32,6 +39,8 @@ export default function MasonryGrid() {
         `${API_ENDPOINTS.EXTERNAL_IMAGES}?query=${encodeURIComponent(q)}`
       );
       
+
+
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
